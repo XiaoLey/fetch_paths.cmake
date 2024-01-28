@@ -22,7 +22,7 @@ fetch_paths(<output_files_var>
 ## Parameters
 
 | Parameter Name                         | Description                                                  |
-| -------------------------------------- | ------------------------------------------------------------ |
+| :------------------------------------- | :----------------------------------------------------------- |
 | `output_files_var`                     | The output file list variable.                               |
 | `RELATIVE_PATH <relative_path>`        | The relative path of the file. If a relative path is provided, it is relative to `CMAKE_CURRENT_SOURCE_DIR`. |
 | `WORKING_DIRECTORY <directory>`        | The working directory. If a relative path is provided, it is relative to `CMAKE_CURRENT_SOURCE_DIR`. |
@@ -44,28 +44,54 @@ fetch_paths(<output_files_var>
 
 ## Examples
 
-```cmake
-# Retrieve the relative paths of all C/C++ source files in the CMAKE_CURRENT_SOURCE_DIR directory
-fetch_paths(output_files)
+- Retrieve the relative paths of all C/C++ source files in the `CMAKE_CURRENT_SOURCE_DIR` directory.
 
-# Retrieve the relative paths of all C/C++ source files in the CMAKE_CURRENT_SOURCE_DIR directory, but do not search subdirectories
-fetch_paths(output_files DISABLE_RECURSION)
+  ```cmake
+  fetch_paths(output_files)
+  ```
 
-# Retrieve the paths of all C/C++ source files in the CMAKE_CURRENT_SOURCE_DIR directory relative to CMAKE_SOURCE_DIR
-fetch_paths(output_files RELATIVE_PATH ${CMAKE_SOURCE_DIR})
+- Retrieve the relative paths of all C/C++ source files in the `CMAKE_CURRENT_SOURCE_DIR` directory, but do not search subdirectories.
 
-# Retrieve the paths of all C/C++ source files in the CMAKE_SOURCE_DIR directory relative to CMAKE_CURRENT_SOURCE_DIR
-fetch_paths(output_files WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  ```cmake
+  fetch_paths(output_files DISABLE_RECURSION)
+  ```
 
-# Retrieve the relative paths of all files involved in Qt compilation in the CMAKE_CURRENT_SOURCE_DIR directory
-fetch_paths(output_files OUTPUT_FILTER_LIST ".+\\.ui$" ".+\\.qrc$" ".+\\.(c|cpp|cc|cxx)$" ".+\\.h$")
+- Retrieve the paths of all C/C++ source files in the `CMAKE_CURRENT_SOURCE_DIR` directory relative to `CMAKE_SOURCE_DIR`.
 
-# Retrieve all directory paths in the CMAKE_CURRENT_SOURCE_DIR directory
-fetch_paths(output_dirs DIRECTORY)
+  ```cmake
+  fetch_paths(output_files RELATIVE_PATH ${CMAKE_SOURCE_DIR})
+  ```
 
-# Retrieve all directory paths in the CMAKE_CURRENT_SOURCE_DIR directory relative to the system root directory
-# Linux
-fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "/")
-# Windows
-fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "C:/")
-```
+- Retrieve the paths of all C/C++ source files in the `CMAKE_SOURCE_DIR` directory relative to `CMAKE_CURRENT_SOURCE_DIR`.
+
+  ```cmake
+  fetch_paths(output_files WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  ```
+
+- Retrieve the relative paths of all files involved in Qt compilation in the `CMAKE_CURRENT_SOURCE_DIR` directory.
+
+  ```cmake
+  fetch_paths(output_files OUTPUT_FILTER_LIST ".+\\.ui$" ".+\\.qrc$" ".+\\.(c|cpp|cc|cxx)$" ".+\\.h$")
+  ```
+
+- Retrieve all directory paths in the `CMAKE_CURRENT_SOURCE_DIR` directory.
+
+  ```cmake
+  fetch_paths(output_dirs DIRECTORY)
+  ```
+
+- Retrieve all directory paths in the `CMAKE_CURRENT_SOURCE_DIR` directory relative to the system root directory.
+
+  ```cmake
+  # Linux
+  fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "/")
+  # Windows
+  fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "C:/")
+  ```
+
+- Retrieve the relative paths of all files and directories in the `CMAKE_CURRENT_SOURCE_DIR` directory.
+
+  ```cmake
+  fetch_paths(output OUTPUT_FILTER_LIST ".*")
+  fetch_paths(output DIRECTORY APPEND)
+  ```

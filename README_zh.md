@@ -1,6 +1,6 @@
 # fetch_paths.cmake
 
-`fetch_paths` 是一个 CMake 函数，用于检索文件或目录路径列表，并支持各种过滤和排序选项。它可以配置为获取文件路径或目录路径，并允许用户指定相对路径、工作目录、输出过滤列表、排除过滤列表等参数。此函数支持递归搜索和非递归搜索，也支持将结果追加到已有列表或覆盖现有列表。
+`fetch_paths` 是一个 CMake 函数，用于检索文件或目录路径，并支持各种过滤和排序选项。它可以配置为获取文件路径或目录路径，并允许用户指定相对路径、工作目录、输出过滤列表、排除过滤列表等参数。此函数支持递归搜索和非递归搜索，也支持将结果追加到已有列表或覆盖现有列表。
 
 ## 函数原型
 
@@ -20,7 +20,7 @@ fetch_paths(<output_files_var>
 ## 参数
 
 | 参数名称                               | 描述                                                         |
-| -------------------------------------- | ------------------------------------------------------------ |
+| :------------------------------------- | :----------------------------------------------------------- |
 | `output_files_var`                     | 输出文件列表变量。                                           |
 | `RELATIVE_PATH <relative_path>`        | 文件的相对路径。如果提供相对路径，相对于 `CMAKE_CURRENT_SOURCE_DIR`。 |
 | `WORKING_DIRECTORY <directory>`        | 工作目录。如果提供相对路径，相对于 `CMAKE_CURRENT_SOURCE_DIR`。 |
@@ -42,28 +42,54 @@ fetch_paths(<output_files_var>
 
 ## 示例
 
-```
-# 获取 CMAKE_CURRENT_SOURCE_DIR 目录中所有 C/C++ 源文件的相对路径
-fetch_paths(output_files)
+- 获取 `CMAKE_CURRENT_SOURCE_DIR` 目录中所有 C/C++ 源文件的相对路径。
 
-# 获取 CMAKE_CURRENT_SOURCE_DIR 目录中所有 C/C++ 源文件的相对路径，但不查找子目录
-fetch_paths(output_files DISABLE_RECURSION)
+  ```cmake
+  fetch_paths(output_files)
+  ```
 
-# 获取 CMAKE_CURRENT_SOURCE_DIR 目录中所有 C/C++ 源文件的相对于 CMAKE_SOURCE_DIR 的路径
-fetch_paths(output_files RELATIVE_PATH ${CMAKE_SOURCE_DIR})
+- 获取 `CMAKE_CURRENT_SOURCE_DIR` 目录中所有 C/C++ 源文件的相对路径，但不查找子目录。
 
-# 获取 CMAKE_SOURCE_DIR 目录中所有 C/C++ 源文件的相对于 CMAKE_CURRENT_SOURCE_DIR 的路径
-fetch_paths(output_files WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  ```cmake
+  fetch_paths(output_files DISABLE_RECURSION)
+  ```
 
-# 获取 CMAKE_CURRENT_SOURCE_DIR 目录中所有参与 Qt 编译的文件的相对路径
-fetch_paths(output_files OUTPUT_FILTER_LIST ".+\\.ui$" ".+\\.qrc$" ".+\\.(c|cpp|cc|cxx)$" ".+\\.h$")
+- 获取 `CMAKE_CURRENT_SOURCE_DIR` 目录中所有 C/C++ 源文件的相对于 `CMAKE_SOURCE_DIR` 的路径。
 
-# 获取 CMAKE_CURRENT_SOURCE_DIR 目录中所有目录路径
-fetch_paths(output_dirs DIRECTORY)
+  ```cmake
+  fetch_paths(output_files RELATIVE_PATH ${CMAKE_SOURCE_DIR})
+  ```
 
-# 获取 CMAKE_CURRENT_SOURCE_DIR 目录中所有目录的相对于系统根目录的路径
-# Linux
-fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "/")
-# Windows
-fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "C:/")
-```
+- 获取 `CMAKE_SOURCE_DIR` 目录中所有 C/C++ 源文件的相对于 `CMAKE_CURRENT_SOURCE_DIR` 的路径。
+
+  ```cmake
+  fetch_paths(output_files WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+  ```
+
+- 获取 `CMAKE_CURRENT_SOURCE_DIR` 目录中所有参与 Qt 编译的文件的相对路径。
+
+  ```cmake
+  fetch_paths(output_files OUTPUT_FILTER_LIST ".+\\.ui$" ".+\\.qrc$" ".+\\.(c|cpp|cc|cxx)$" ".+\\.h$")
+  ```
+
+- 获取 `CMAKE_CURRENT_SOURCE_DIR` 目录中所有目录路径。
+
+  ```cmake
+  fetch_paths(output_dirs DIRECTORY)
+  ```
+
+- 获取 `CMAKE_CURRENT_SOURCE_DIR` 目录中所有目录的相对于系统根目录的路径。
+
+  ```cmake
+  # Linux
+  fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "/")
+  # Windows
+  fetch_paths(output_dirs DIRECTORY RELATIVE_PATH "C:/")
+  ```
+
+- 获取 `CMAKE_SOURCE_DIR` 目录中所有文件和目录的相对路径。
+
+  ```cmake
+  fetch_paths(output OUTPUT_FILTER_LIST ".*")
+  fetch_paths(output DIRECTORY APPEND)
+  ```
