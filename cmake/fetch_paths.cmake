@@ -67,9 +67,9 @@ function(_fetch_paths_filter_list_by_regexes input_list filter_list output_list)
 endfunction()
 
 
-function(fetch_paths output_files_var)
-    if (NOT DEFINED output_files_var OR "${output_files_var}" STREQUAL "")
-        message(FATAL_ERROR "output_files_var is empty")
+function(fetch_paths output_var)
+    if (NOT DEFINED output_var OR "${output_var}" STREQUAL "")
+        message(FATAL_ERROR "output_var is empty")
     endif ()
 
     set(options APPEND DISABLE_RECURSION DIRECTORY)
@@ -187,11 +187,11 @@ function(fetch_paths output_files_var)
 
     # if append mode is enabled, append the output file list to the existing file list.
     if (fetch_paths_APPEND)
-        set(output_files_current "${${output_files_var}};${output_files_current}")
+        set(output_files_current "${${output_var}};${output_files_current}")
     endif ()
 
     # remove empty strings, and set the output file list and the exclusion list.
     list(FILTER output_files_current EXCLUDE REGEX "^$")  # remove empty strings
-    set(${output_files_var} "${output_files_current}" PARENT_SCOPE)
+    set(${output_var} "${output_files_current}" PARENT_SCOPE)
     set(${fetch_paths_EXCLUDE_LIST_VAR} "${${fetch_paths_EXCLUDE_LIST_VAR}}" PARENT_SCOPE)
 endfunction()

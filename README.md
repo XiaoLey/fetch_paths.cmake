@@ -7,7 +7,7 @@
 ## Function Prototype
 
 ```cmake
-fetch_paths(<output_files_var>
+fetch_paths(<output_var>
             [RELATIVE_PATH <relative_path>]
             [WORKING_DIRECTORY <directory>]
             [OUTPUT_FILTER_LIST <regex> ...]
@@ -23,7 +23,7 @@ fetch_paths(<output_files_var>
 
 | Parameter Name                         | Description                                                  |
 | :------------------------------------- | :----------------------------------------------------------- |
-| `output_files_var`                     | The output file list variable.                               |
+| `output_var`                           | The output file list variable.                               |
 | `RELATIVE_PATH <relative_path>`        | The relative path of the file. If a relative path is provided, it is relative to `CMAKE_CURRENT_SOURCE_DIR`. |
 | `WORKING_DIRECTORY <directory>`        | The working directory. If a relative path is provided, it is relative to `CMAKE_CURRENT_SOURCE_DIR`. |
 | `OUTPUT_FILTER_LIST <regex> ...`       | The output filter list, using regular expressions to match the relative path of the files. |

@@ -5,7 +5,7 @@
 ## 函数原型
 
 ```cmake
-fetch_paths(<output_files_var>
+fetch_paths(<output_var>
             [RELATIVE_PATH <relative_path>]
             [WORKING_DIRECTORY <directory>]
             [OUTPUT_FILTER_LIST <regex> ...]
@@ -19,9 +19,9 @@ fetch_paths(<output_files_var>
 
 ## 参数
 
-| 参数名称                               | 描述                                                         |
+| 参数名称                                | 描述                                                         |
 | :------------------------------------- | :----------------------------------------------------------- |
-| `output_files_var`                     | 输出文件列表变量。                                           |
+| `output_var`                           | 输出文件列表变量。                                           |
 | `RELATIVE_PATH <relative_path>`        | 文件的相对路径。如果提供相对路径，相对于 `CMAKE_CURRENT_SOURCE_DIR`。 |
 | `WORKING_DIRECTORY <directory>`        | 工作目录。如果提供相对路径，相对于 `CMAKE_CURRENT_SOURCE_DIR`。 |
 | `OUTPUT_FILTER_LIST <regex> ...`       | 输出过滤列表，使用正则表达式匹配文件的相对路径。             |
