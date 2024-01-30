@@ -23,22 +23,23 @@ fetch_paths(<output_var>
 
 | Parameter Name                         | Description                                                  |
 | :------------------------------------- | :----------------------------------------------------------- |
-| `output_var`                           | The output file list variable.                               |
-| `RELATIVE_PATH <relative_path>`        | The relative path of the file. If a relative path is provided, it is relative to `CMAKE_CURRENT_SOURCE_DIR`. |
-| `WORKING_DIRECTORY <directory>`        | The working directory. If a relative path is provided, it is relative to `CMAKE_CURRENT_SOURCE_DIR`. |
-| `OUTPUT_FILTER_LIST <regex> ...`       | The output filter list, using regular expressions to match the relative path of the files. |
-| `EXCLUDE_FILTER_LIST <regex> ...`      | The exclude filter list, using regular expressions to match the relative path of the files. **Its priority is higher than the "output filter list (`OUTPUT_FILTER_LIST`)".** |
-| `EXCLUDE_LIST_VAR <var>`               | The exclude list variable. Paths that do not meet the filter criteria will be saved to this variable. |
-| `EXCLUDE_LIST_FILTER_LIST <regex> ...` | The exclude list filter list, using regular expressions to match the relative path of the files. In the "exclude list (`EXCLUDE_LIST_VAR`)", paths that meet the filter criteria of this list will be retained, and the rest will be removed. |
-| `APPEND`                               | Append mode. If set, the output file list will be appended to the existing file list, otherwise it will overwrite. |
-| `DISABLE_RECURSION`                    | Disable recursion. If set, only files in the specified working directory will be retrieved, without recursing into subdirectories. |
-| `DIRECTORY`                            | Retrieve directories instead of files.                       |
+| `output_var`                           | The output list variable.                                    |
+| `RELATIVE_PATH <relative_path>`        | The relative path for output. If a relative path is provided, it's relative to `CMAKE_CURRENT_SOURCE_DIR`. |
+| `WORKING_DIRECTORY <directory>`        | The working directory for output. If a relative path is provided, it's relative to `CMAKE_CURRENT_SOURCE_DIR`. |
+| `OUTPUT_FILTER_LIST <regex> ...`       | The output filter list, matching paths using regular expressions. |
+| `EXCLUDE_FILTER_LIST <regex> ...`      | The exclude filter list, matching paths using regular expressions. **It excludes paths on top of the `OUTPUT_FILTER_LIST`.** |
+| `EXCLUDE_LIST_VAR <var>`               | The exclude list variable. Paths that do not meet the filter criteria are saved to this variable. If `EXCLUDE_FILTER_LIST` is not defined, then the variable is always empty. |
+| `EXCLUDE_LIST_FILTER_LIST <regex> ...` | The exclude list filter list, matching paths using regular expressions. In the `EXCLUDE_LIST_VAR` list, paths that meet this filter list's criteria are retained, and the rest are removed. **This filter only affects the `EXCLUDE_LIST_VAR`, not the `output_var`.** |
+| `APPEND`                               | Append mode. If set, the output list is appended to the existing output list; otherwise, it overrides. |
+| `DISABLE_RECURSION`                    | Disable recursion. If set, only files or directories in the specified working directory are retrieved (depending on the context), without recursing into subdirectories. |
+| `DIRECTORY`                            | Fetch directories instead of files.                          |
+
 
 ## Default Values
 
 - If `RELATIVE_PATH` and `WORKING_DIRECTORY` are not specified or are empty, the default is `CMAKE_CURRENT_SOURCE_DIR`.
 - The default `OUTPUT_FILTER_LIST` is `[".+\.(c|cpp|cc|cxx)$"]`, if `DIRECTORY` is set, then it is `[".*"]`.
-- The default `EXCLUDE_FILTER_LIST` is empty.
+- The default `EXCLUDE_FILTER_LIST` is undefined.
 - The default `EXCLUDE_LIST_FILTER_LIST` is `[".*"]`.
 - `DISABLE_RECURSION`, `APPEND` are not set by default.
 
