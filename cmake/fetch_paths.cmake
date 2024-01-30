@@ -13,6 +13,14 @@ if (NOT FETCH_PATHS_LIST OR NOT "${CMAKE_CURRENT_LIST_FILE}" IN_LIST FETCH_PATHS
 endif ()
 
 
+# clear the exclusion list
+macro(_fetch_paths_clear_exc_var exc_var_var)
+    if (DEFINED ${exc_var_var} AND NOT "${${exc_var_var}}" STREQUAL "")
+        unset(${${exc_var_var}})
+    endif ()
+endmacro()
+
+
 # normalizing paths
 macro(_fetch_paths_normalize_path normalize_var default_vlue)
     if (NOT DEFINED ${normalize_var} OR "${${normalize_var}}" STREQUAL "")
@@ -48,7 +56,8 @@ endmacro()
 
 
 # filter list by regexes
-function(_fetch_paths_filter_list_by_regexes input_list filter_list output_list)
+function(_fetch_paths_filter_list input_list filter_list output_list)
+    list(LENGTH ${input_list} _length)
     set(_temp_list "${${input_list}}") # copy list
     set(_temp_output_files "")
     foreach (_regex IN LISTS ${filter_list})
@@ -63,6 +72,15 @@ function(_fetch_paths_filter_list_by_regexes input_list filter_list output_list)
         list(REMOVE_ITEM ${input_list} ${_temp_list})
         set(_temp_list "${${input_list}}") # copy list
     endforeach ()
+
+    # check if it is correct.
+    list(LENGTH ${input_list} _length2)
+    list(LENGTH _temp_output_files _length3)
+    math(EXPR _length2 "${_length2} + ${_length3}")
+    if (NOT _length EQUAL _length2)
+        message(FATAL_ERROR "Error occurred during matching")
+    endif ()
+
     set(${output_list} "${_temp_output_files}" PARENT_SCOPE)
 endfunction()
 
@@ -77,6 +95,9 @@ function(fetch_paths output_var)
     set(multiValueArgs OUTPUT_FILTER_LIST EXCLUDE_FILTER_LIST EXCLUDE_LIST_FILTER_LIST)
 
     cmake_parse_arguments(fetch_paths "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    # clear EXCLUDE_LIST_VAR
+    _fetch_paths_clear_exc_var(fetch_paths_EXCLUDE_LIST_VAR)
 
     # define RELATIVE_PATH
     _fetch_paths_normalize_path(fetch_paths_RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR)
@@ -132,6 +153,8 @@ function(fetch_paths output_var)
                 endif ()
             endforeach ()
         endforeach ()
+
+        unset(_exclude_file)
     else ()
         foreach (file_path IN LISTS file_paths)
             foreach (_regex IN LISTS fetch_paths_OUTPUT_FILTER_LIST)
@@ -149,40 +172,15 @@ function(fetch_paths output_var)
     if (_length GREATER 1)
         list(LENGTH fetch_paths_OUTPUT_FILTER_LIST _length) # get the length of the output filter list.
         if (_length GREATER 1)
-            list(LENGTH output_files_current _length)
-
-            # filter the current output file list according to the regexes.
-            _fetch_paths_filter_list_by_regexes(output_files_current fetch_paths_OUTPUT_FILTER_LIST _temp_output_files)
-
-            # check if the length of the current output file list is equal to the length of the sorted output file list,
-            # if it is, set the current output file list to the sorted output file list, else an error occurred during copying.
-            list(LENGTH _temp_output_files _length2)
-            if (_length EQUAL _length2)
-                set(output_files_current "${_temp_output_files}")
-            else ()
-                message(FATAL_ERROR "Error occurred during copying")
-            endif ()
+            _fetch_paths_filter_list(output_files_current fetch_paths_OUTPUT_FILTER_LIST _temp_output_files)
+            set(output_files_current "${_temp_output_files}")
         endif ()
     endif ()
 
     # remove the files in the exclusion list from the output file list.
     if (DEFINED fetch_paths_EXCLUDE_LIST_VAR AND DEFINED fetch_paths_EXCLUDE_LIST_FILTER_LIST)
-        list(LENGTH ${fetch_paths_EXCLUDE_LIST_VAR} _length)
-        if (_length GREATER 1)
-            # filter the exclusion list according to the regexes
-            _fetch_paths_filter_list_by_regexes(${fetch_paths_EXCLUDE_LIST_VAR} fetch_paths_EXCLUDE_LIST_FILTER_LIST _temp_output_files)
-
-            # check if the length of the exclusion list is equal to the length of the sorted exclusion list,
-            # if it is, set the exclusion list to the sorted exclusion list, else an error occurred during copying.
-            list(LENGTH ${fetch_paths_EXCLUDE_LIST_VAR} _length2)
-            list(LENGTH _temp_output_files _length3)
-            math(EXPR _length2 "${_length2} + ${_length3}")
-            if (_length EQUAL _length2)
-                set(${fetch_paths_EXCLUDE_LIST_VAR} "${_temp_output_files}")
-            else ()
-                message(FATAL_ERROR "Error occurred during copying")
-            endif ()
-        endif ()
+        _fetch_paths_filter_list(${fetch_paths_EXCLUDE_LIST_VAR} fetch_paths_EXCLUDE_LIST_FILTER_LIST _temp_exclude_files)
+        set(${fetch_paths_EXCLUDE_LIST_VAR} "${_temp_exclude_files}")
     endif ()
 
     # if append mode is enabled, append the output file list to the existing file list.
