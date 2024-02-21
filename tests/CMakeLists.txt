@@ -1,4 +1,4 @@
-include(fetch_paths)
+include(${FETCH_PATHS_CMAKE_DIR}/fetch_paths.cmake)
 
 function(check_strs_exists list_var)
     foreach (var IN LISTS ARGN)
