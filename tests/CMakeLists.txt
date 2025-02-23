@@ -1,31 +1,57 @@
 include(${FETCH_PATHS_CMAKE_DIR}/fetch_paths.cmake)
 
+# Ensure global variables INDEX and TOTAL_TESTS
+set(INDEX 0 CACHE INTERNAL "Current test index")
+set(TOTAL_TESTS 0 CACHE INTERNAL "Total test count")
+
+# Increment the total test count manually
+function(add_test_count count)
+    math(EXPR TOTAL_TESTS "${TOTAL_TESTS} + ${count}")
+    set(TOTAL_TESTS ${TOTAL_TESTS} CACHE INTERNAL "")
+endfunction()
+
+# Output function with dynamic progress including total tests
+function(output_test_result result msg)
+    math(EXPR INDEX "${INDEX} + 1")         # Increment global INDEX
+    set(INDEX ${INDEX} CACHE INTERNAL "")   # Update global INDEX
+
+    if (result)
+        message("[${INDEX}/${TOTAL_TESTS}]\tpassed - ${msg}")
+    else()
+        message(FATAL_ERROR "[${INDEX}/${TOTAL_TESTS}]\tfailed - ${msg}")
+    endif()
+endfunction()
+
+# Example test functions using the output formatter
 function(check_strs_exists list_var)
     foreach (var IN LISTS ARGN)
         if (NOT "${var}" IN_LIST ${list_var})
-            message(FATAL_ERROR "${var} not found in ${list_var}")
+            output_test_result(FALSE "${var} not found in ${list_var}")
         endif ()
     endforeach ()
-    message("passed - `${ARGN}` found in ${list_var}")
+    output_test_result(TRUE "`${ARGN}` found in ${list_var}")
 endfunction()
 
 function(check_strs_not_exists list_var)
     foreach (var IN LISTS ARGN)
         if ("${var}" IN_LIST ${list_var})
-            message(FATAL_ERROR "${var} found in ${list_var}")
+            output_test_result(FALSE "${var} should not exist in ${list_var}")
         endif ()
     endforeach ()
-    message("passed - `${ARGN}` not found in ${list_var}")
+    output_test_result(TRUE "`${ARGN}` not found in ${list_var}")
 endfunction()
 
 function(check_list_length list_var length)
     list(LENGTH ${list_var} len)
     if (NOT len EQUAL ${length})
-        message(FATAL_ERROR "${list_var} length not equal to ${length}, actual: ${len}")
+        output_test_result(FALSE "Expected length of ${list_var} is ${length}, got ${len}")
     endif ()
-    message("passed - ${list_var} length: ${len}")
+    output_test_result(TRUE "Length of ${list_var} is ${len}")
 endfunction()
 
+
+# Pre-compute the total number of tests
+add_test_count(32)
 
 # fetch "a.c" and "b.cpp"
 fetch_paths(files DISABLE_RECURSION)
@@ -61,16 +87,16 @@ unset(files)
 
 # fetch all source files recursively
 fetch_paths(files)
-check_strs_exists(files a.c b.cpp folder1/folder1.cpp folder2/folder3/folder3.c folder2/folder3/folder3.cpp)
+check_strs_exists(files a.c b.cpp folder1/file1.cpp folder2/folder3/file3.c folder2/folder3/file3.cpp)
 check_list_length(files 5)
 
 unset(files)
 
 # fetch all c source files recursively
 fetch_paths(files EXCLUDE_LIST_VAR exc_files EXCLUDE_FILTER_LIST "\.cpp$")
-check_strs_exists(files a.c folder2/folder3/folder3.c)
-check_strs_not_exists(files b.cpp folder1/folder1.cpp folder2/folder3/folder3.cpp)
-check_strs_exists(exc_files b.cpp folder1/folder1.cpp folder2/folder3/folder3.cpp)
+check_strs_exists(files a.c folder2/folder3/file3.c)
+check_strs_not_exists(files b.cpp folder1/file1.cpp folder2/folder3/file3.cpp)
+check_strs_exists(exc_files b.cpp folder1/file1.cpp folder2/folder3/file3.cpp)
 check_list_length(files 2)
 check_list_length(exc_files 3)
 
@@ -79,10 +105,10 @@ unset(exc_files)
 
 # fetch all c source files recursively, but the `exc_files` variable contains direct excluded files 
 fetch_paths(files EXCLUDE_LIST_VAR exc_files EXCLUDE_FILTER_LIST "\.cpp$" EXCLUDE_LIST_FILTER_LIST "^[^/]+$")
-check_strs_exists(files a.c folder2/folder3/folder3.c)
-check_strs_not_exists(files b.cpp folder1/folder1.cpp folder2/folder3/folder3.cpp)
+check_strs_exists(files a.c folder2/folder3/file3.c)
+check_strs_not_exists(files b.cpp folder1/file1.cpp folder2/folder3/file3.cpp)
 check_strs_exists(exc_files b.cpp)
-check_strs_not_exists(exc_files folder1/folder1.cpp folder2/folder3/folder3.cpp)
+check_strs_not_exists(exc_files folder1/file1.cpp folder2/folder3/file3.cpp)
 
 unset(files)
 unset(exc_files)
@@ -111,7 +137,7 @@ unset(files)
 
 # fetch all header files recursively but exclude "a.h"
 fetch_paths(files OUTPUT_FILTER_LIST "\.h$" "\.hpp$" EXCLUDE_LIST_VAR exc_files EXCLUDE_FILTER_LIST "^a\.h$")
-check_strs_exists(files folder2/folder3/folder3.h b.hpp)
+check_strs_exists(files folder2/folder3/file3.h b.hpp)
 check_strs_exists(exc_files a.h)
 check_list_length(files 2)
 check_list_length(exc_files 1)
