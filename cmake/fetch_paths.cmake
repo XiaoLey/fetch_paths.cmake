@@ -24,12 +24,12 @@ endmacro()
 # normalizing paths
 macro(_fetch_paths_normalize_path normalize_var default_vlue)
     if (NOT DEFINED ${normalize_var} OR "${${normalize_var}}" STREQUAL "")
-        if (NOT DEFINED ${default_vlue})
+        if (NOT DEFINED ${default_vlue} OR "${${default_vlue}}" STREQUAL "")
             message(FATAL_ERROR "${default_vlue} is not defined")
         endif ()
         set(${normalize_var} "${${default_vlue}}")
     elseif (NOT IS_ABSOLUTE "${${normalize_var}}")
-        if (NOT DEFINED ${default_vlue})
+        if (NOT DEFINED ${default_vlue} OR "${${default_vlue}}" STREQUAL "")
             message(FATAL_ERROR "${default_vlue} is not defined")
         endif ()
         set(${normalize_var} "${${default_vlue}}/${${normalize_var}}")
@@ -40,7 +40,7 @@ endmacro()
 # define filter lists
 macro(_fetch_paths_define_filter_lists output_filter_list exclude_list_filter_list is_directory)
     # define ${output_filter_list}
-    if (NOT DEFINED ${output_filter_list})
+    if (NOT DEFINED ${output_filter_list} OR "${${output_filter_list}}" STREQUAL "")
         if (${is_directory})
             list(APPEND ${output_filter_list} ".*")
         else ()
@@ -49,7 +49,7 @@ macro(_fetch_paths_define_filter_lists output_filter_list exclude_list_filter_li
     endif ()
 
     # define ${exclude_list_filter_list}
-    if (NOT DEFINED ${exclude_list_filter_list})
+    if (NOT DEFINED ${exclude_list_filter_list} OR "${${exclude_list_filter_list}}" STREQUAL "")
         list(APPEND ${exclude_list_filter_list} ".*")
     endif ()
 endmacro()
@@ -85,16 +85,23 @@ function(_fetch_paths_filter_list input_list filter_list output_list)
 endfunction()
 
 
-function(fetch_paths output_var)
-    if (NOT DEFINED output_var OR "${output_var}" STREQUAL "")
-        message(FATAL_ERROR "output_var is empty")
-    endif ()
-
+# parse command-line options and return them to the parent scope
+macro(_fetch_paths_parse_options)
     set(options APPEND DISABLE_RECURSION DIRECTORY)
     set(oneValueArgs RELATIVE_PATH WORKING_DIRECTORY EXCLUDE_LIST_VAR)
     set(multiValueArgs OUTPUT_FILTER_LIST EXCLUDE_FILTER_LIST EXCLUDE_LIST_FILTER_LIST)
 
     cmake_parse_arguments(fetch_paths "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+endmacro()
+
+
+function(fetch_paths output_var)
+    if (NOT DEFINED output_var OR "${output_var}" STREQUAL "")
+        message(FATAL_ERROR "output_var is empty")
+    endif ()
+
+    # parse command-line options
+    _fetch_paths_parse_options(${ARGN})
 
     # clear EXCLUDE_LIST_VAR
     _fetch_paths_clear_exc_var(fetch_paths_EXCLUDE_LIST_VAR)
@@ -127,7 +134,7 @@ function(fetch_paths output_var)
     endif ()
 
     # get the output file list.
-    if (DEFINED fetch_paths_EXCLUDE_FILTER_LIST)
+    if (DEFINED fetch_paths_EXCLUDE_FILTER_LIST AND NOT "${fetch_paths_EXCLUDE_FILTER_LIST}" STREQUAL "")
         foreach (file_path IN LISTS file_paths)
             foreach (_regex IN LISTS fetch_paths_OUTPUT_FILTER_LIST)
                 # if the current file matches the filter, add it to the current output list.
@@ -144,7 +151,7 @@ function(fetch_paths output_var)
                     # if the current file is not in the exclusion list, add it to the current output list, else add it to the exclusion list.
                     if (NOT _exclude_file)
                         list(APPEND output_files_current "${file_path}")
-                    elseif (DEFINED fetch_paths_EXCLUDE_LIST_VAR)
+                    elseif (DEFINED fetch_paths_EXCLUDE_LIST_VAR AND NOT "${fetch_paths_EXCLUDE_LIST_VAR}" STREQUAL "")
                         # add to the exclusion list
                         list(APPEND ${fetch_paths_EXCLUDE_LIST_VAR} "${file_path}")
                     endif ()
@@ -178,7 +185,8 @@ function(fetch_paths output_var)
     endif ()
 
     # remove the files in the exclusion list from the output file list.
-    if (DEFINED fetch_paths_EXCLUDE_LIST_VAR AND DEFINED fetch_paths_EXCLUDE_LIST_FILTER_LIST)
+    if (DEFINED fetch_paths_EXCLUDE_LIST_VAR AND NOT "${fetch_paths_EXCLUDE_LIST_VAR}" STREQUAL ""
+        AND DEFINED fetch_paths_EXCLUDE_LIST_FILTER_LIST AND NOT "${fetch_paths_EXCLUDE_LIST_FILTER_LIST}" STREQUAL "")
         _fetch_paths_filter_list(${fetch_paths_EXCLUDE_LIST_VAR} fetch_paths_EXCLUDE_LIST_FILTER_LIST _temp_exclude_files)
         set(${fetch_paths_EXCLUDE_LIST_VAR} "${_temp_exclude_files}")
     endif ()
