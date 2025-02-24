@@ -95,14 +95,7 @@ macro(_fetch_paths_parse_options)
 endmacro()
 
 
-function(fetch_paths output_var)
-    if (NOT DEFINED output_var OR "${output_var}" STREQUAL "")
-        message(FATAL_ERROR "output_var is empty")
-    endif ()
-
-    # parse command-line options
-    _fetch_paths_parse_options(${ARGN})
-
+macro(_fetch_paths_prepare_variables)
     # clear EXCLUDE_LIST_VAR
     _fetch_paths_clear_exc_var(fetch_paths_EXCLUDE_LIST_VAR)
 
@@ -113,25 +106,48 @@ function(fetch_paths output_var)
     _fetch_paths_normalize_path(fetch_paths_WORKING_DIRECTORY CMAKE_CURRENT_SOURCE_DIR)
 
     # define OUTPUT_FILTER_LIST and EXCLUDE_LIST_FILTER_LIST
-    _fetch_paths_define_filter_lists(fetch_paths_OUTPUT_FILTER_LIST fetch_paths_EXCLUDE_LIST_FILTER_LIST fetch_paths_DIRECTORY)
+    _fetch_paths_define_filter_lists(fetch_paths_OUTPUT_FILTER_LIST
+                                     fetch_paths_EXCLUDE_LIST_FILTER_LIST
+                                     fetch_paths_DIRECTORY)
+endmacro()
 
-    # if disable recursion is enabled, get the file list without recursion, else get the file list recursively.
-    if (fetch_paths_DISABLE_RECURSION)
-        file(GLOB file_paths LIST_DIRECTORIES ${fetch_paths_DIRECTORY} RELATIVE "${fetch_paths_RELATIVE_PATH}"
-             "${fetch_paths_WORKING_DIRECTORY}/*")
-    else ()
-        file(GLOB_RECURSE file_paths LIST_DIRECTORIES ${fetch_paths_DIRECTORY} RELATIVE "${fetch_paths_RELATIVE_PATH}"
-             "${fetch_paths_WORKING_DIRECTORY}/*")
-    endif ()
+
+function(_fetch_paths_collect_file_list outVar)
+    # Determine whether to get the directory list recursively according to the global variable fetch_paths_DISABLE_RECURSION
+    if (${fetch_paths_DISABLE_RECURSION})
+        file(GLOB _collected LIST_DIRECTORIES ${fetch_paths_DIRECTORY}
+             RELATIVE "${fetch_paths_RELATIVE_PATH}" "${fetch_paths_WORKING_DIRECTORY}/*")
+    else()
+        file(GLOB_RECURSE _collected LIST_DIRECTORIES ${fetch_paths_DIRECTORY}
+             RELATIVE "${fetch_paths_RELATIVE_PATH}" "${fetch_paths_WORKING_DIRECTORY}/*")
+    endif()
 
     # check if is match directory, if it is, remove the files in the file list.
     if (fetch_paths_DIRECTORY)
-        foreach (file_path IN LISTS file_paths)
-            if (NOT IS_DIRECTORY "${fetch_paths_RELATIVE_PATH}/${file_path}")
-                list(REMOVE_ITEM file_paths "${file_path}")
-            endif ()
-        endforeach ()
+        foreach (_fp IN LISTS _collected)
+            if (NOT IS_DIRECTORY "${fetch_paths_RELATIVE_PATH}/${_fp}")
+                list(REMOVE_ITEM _collected "${_fp}")
+            endif()
+        endforeach()
+    endif()
+
+    set(${outVar} "${_collected}" PARENT_SCOPE)
+endfunction()
+
+
+function(fetch_paths output_var)
+    if (NOT DEFINED output_var OR "${output_var}" STREQUAL "")
+        message(FATAL_ERROR "output_var is empty")
     endif ()
+
+    # parse command-line options
+    _fetch_paths_parse_options(${ARGN})
+
+    # prepare variables & paths
+    _fetch_paths_prepare_variables()
+
+    # collect file list
+    _fetch_paths_collect_file_list(file_paths)
 
     # get the output file list.
     if (DEFINED fetch_paths_EXCLUDE_FILTER_LIST AND NOT "${fetch_paths_EXCLUDE_FILTER_LIST}" STREQUAL "")
