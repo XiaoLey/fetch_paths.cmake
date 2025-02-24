@@ -1,6 +1,6 @@
 # fetch_paths.cmake
 
-[[🇨🇳 中文]](README_zh.md)
+[[🇨🇳 中文]](README_zh.md) [[🇯🇵 日本語]](README_ja.md) [[🇷🇺 Русский]](README_ru.md) [[🇪🇸 Español]](README_es.md) [[🇫🇷 Français]](README_fr.md)
 
 ## Introduction
 
