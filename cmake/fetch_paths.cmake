@@ -112,6 +112,7 @@ macro(_fetch_paths_prepare_variables)
 endmacro()
 
 
+# collect file list
 function(_fetch_paths_collect_file_list outVar)
     # Determine whether to get the directory list recursively according to the global variable fetch_paths_DISABLE_RECURSION
     if (${fetch_paths_DISABLE_RECURSION})
