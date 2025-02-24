@@ -2,7 +2,9 @@
 
 [[🇨🇳 中文]](README_zh.md)
 
-`fetch_paths` is a CMake function designed to retrieve a list of file or directory paths, offering a wide range of filtering and sorting options. It allows the configuration to fetch either file paths or directory paths and enables users to specify parameters such as relative paths, working directories, output filter lists, and exclude filter lists. The function supports both recursive and non-recursive searching and provides the option to append results to an existing list or overwrite it.
+## Introduction
+
+`fetch_paths()` is a flexible and powerful custom CMake function designed to search directories and extract file or subdirectory paths. With a rich set of filtering options based on regular expressions, you can easily configure the starting directory, specify the base for relative paths, and apply both inclusion and exclusion filters. Whether you need recursive traversal or a one-level search, and whether you want to merge new results with existing ones or replace them entirely, `fetch_paths()` streamlines file and directory management during your build process.
 
 ## Function Prototype
 
@@ -19,29 +21,20 @@ fetch_paths(<output_var>
             [DIRECTORY])
 ```
 
-## Parameters
+## Parameter Explanation
 
 | Parameter Name                         | Description                                                  |
 | :------------------------------------- | :----------------------------------------------------------- |
-| `output_var`                           | The output list variable.                                    |
-| `RELATIVE_PATH <relative_path>`        | The relative path for output. If a relative path is provided, it's relative to `CMAKE_CURRENT_SOURCE_DIR`. |
-| `WORKING_DIRECTORY <directory>`        | The working directory for output. If a relative path is provided, it's relative to `CMAKE_CURRENT_SOURCE_DIR`. |
-| `OUTPUT_FILTER_LIST <regex> ...`       | The output filter list, matching paths using regular expressions. |
-| `EXCLUDE_FILTER_LIST <regex> ...`      | The exclude filter list, matching paths using regular expressions. **It excludes paths on top of the `OUTPUT_FILTER_LIST`.** |
-| `EXCLUDE_LIST_VAR <var>`               | The exclude list variable. Paths that do not meet the filter criteria are saved to this variable. If `EXCLUDE_FILTER_LIST` is not defined, then the variable is always empty. |
-| `EXCLUDE_LIST_FILTER_LIST <regex> ...` | The exclude list filter list, matching paths using regular expressions. In the `EXCLUDE_LIST_VAR` list, paths that meet this filter list's criteria are retained, and the rest are removed. **This filter only affects the `EXCLUDE_LIST_VAR`, not the `output_var`.** |
-| `APPEND`                               | Append mode. If set, the output list is appended to the existing output list; otherwise, it overrides. |
-| `DISABLE_RECURSION`                    | Disable recursion. If set, only files or directories in the specified working directory are retrieved (depending on the context), without recursing into subdirectories. |
-| `DIRECTORY`                            | Fetch directories instead of files.                          |
-
-
-## Default Values
-
-- If `RELATIVE_PATH` and `WORKING_DIRECTORY` are not specified or are empty, the default is `CMAKE_CURRENT_SOURCE_DIR`.
-- The default `OUTPUT_FILTER_LIST` is `[".+\.(c|cpp|cc|cxx)$"]`, if `DIRECTORY` is set, then it is `[".*"]`.
-- The default `EXCLUDE_FILTER_LIST` is undefined.
-- The default `EXCLUDE_LIST_FILTER_LIST` is `[".*"]`.
-- `DISABLE_RECURSION`, `APPEND` are not set by default.
+| `output_var`                           | Mandatory. This variable will store the list of paths (files or directories) identified by the search. |
+| `RELATIVE_PATH <relative_path>`        | Defines the base directory to which the output paths will be made relative. If not specified, paths default to being relative to `CMAKE_CURRENT_SOURCE_DIR`. |
+| `WORKING_DIRECTORY <directory>`        | Specifies the directory where the search begins. This can be provided as a relative path (based on `CMAKE_CURRENT_SOURCE_DIR`). If omitted, it defaults to `CMAKE_CURRENT_SOURCE_DIR`. |
+| `OUTPUT_FILTER_LIST <regex> ...`       | **A list of regular expressions** used to filter the output results. Only paths matching at least one of these patterns are kept. By default, this is set to `.+\.(c|cpp|cc|cxx)$` for files, or `.*` when the `DIRECTORY` option is enabled. |
+| `EXCLUDE_FILTER_LIST <regex> ...`      | **A list of regular expressions** defining patterns for paths to exclude. These filters are applied after the output filters, removing any paths that match the specified patterns. |
+| `EXCLUDE_LIST_VAR <var>`               | Specifies a variable name where paths that do not meet the filter criteria are stored. If no `EXCLUDE_FILTER_LIST` is provided, this variable remains empty. |
+| `EXCLUDE_LIST_FILTER_LIST <regex> ...` | Applies additional filtering to the paths collected in `EXCLUDE_LIST_VAR`, only retaining those that match the provided regular expressions. **Note that this filter does not affect the main output variable.** |
+| `APPEND`                               | Enables append mode. When set, newly found paths will be added to the existing content of `output_var` rather than replacing it. |
+| `DISABLE_RECURSION`                    | Disables recursive search, so the function will only search within the specified working directory without descending into subdirectories. |
+| `DIRECTORY`                            | Indicates that the function should retrieve directory paths **instead of file paths**. When used, the default **output filter** automatically changes to `.*`. |
 
 ## Examples
 
