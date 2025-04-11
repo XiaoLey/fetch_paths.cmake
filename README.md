@@ -1,10 +1,30 @@
 # fetch_paths.cmake
 
-[[🇨🇳 中文]](README_zh.md) [[🇯🇵 日本語]](README_ja.md) [[🇷🇺 Русский]](README_ru.md) [[🇪🇸 Español]](README_es.md) [[🇫🇷 Français]](README_fr.md)
+[[🇨🇳 中文]](README_zh.md)
 
 ## Introduction
 
-`fetch_paths()` is a flexible and powerful custom CMake function designed to search directories and extract file or subdirectory paths. With a rich set of filtering options based on regular expressions, you can easily configure the starting directory, specify the base for relative paths, and apply both inclusion and exclusion filters. Whether you need recursive traversal or a one-level search, and whether you want to merge new results with existing ones or replace them entirely, `fetch_paths()` streamlines file and directory management during your build process.
+**A minimal yet powerful CMake utility for smart file & directory path handling.**
+
+Tired of manually managing paths in your CMake projects? `fetch_paths.cmake` provides a **lightweight, flexible solution** to:
+
+- 🔍 Dynamically retrieve file/directory paths
+- ⚙️ Support recursive search and regex filtering
+- 📏 Generate paths relative to specified directory
+
+```cmake
+include(fetch_paths.cmake)
+fetch_paths(output_files OUTPUT_FILTER_LIST ".+\\.(c|cpp|h|hpp|qrc|ui)$")  # That's it!
+add_executable(qt_pro ${output_files})
+```
+
+**Ideal for:**
+
+✔ Modern CMake projects
+
+✔ Projects with dynamic file structures
+
+✔ Replacing messy `file(GLOB)` or manual path lists
 
 ## Function Prototype
 
