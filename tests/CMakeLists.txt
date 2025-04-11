@@ -203,3 +203,5 @@ fetch_paths(files OUTPUT_FILTER_LIST "\.h$|\.hpp$")
 check_list_order(files a.h b.hpp folder2/folder3/file3.h)
 
 unset(files)
+
+message("All tests passed!")
